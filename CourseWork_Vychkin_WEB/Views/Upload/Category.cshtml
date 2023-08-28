@@ -1,0 +1,49 @@
+﻿@model List<Category>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+    int count = 0;
+}
+
+<div class="row">
+    <div class="col-3"></div>
+    <div class="col-6 mt-5">
+        <div class="container">
+            <div class="row">
+            <h1>Select category of your house:</h1>
+
+            </div>
+            <div class="row">
+
+            
+            @foreach (var item in Model)
+            {
+
+                <div class="col-4">
+                        <input form="MyForm" type="radio" class="btn-check" name="Category" value="@item.Id" id="option(@count)" autocomplete="off">
+                        <label class="btn w-100 fs-4 mt-3 " for="option(@count)" style="background-color: rgb(245,245,245)">@item.Name</label>
+                </div>
+                count++;
+            }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-3"></div>
+</div>
+<div class="w-100">
+    <div class="d-flex" style="height:10vh;position:absolute; left:0px; bottom:9vh;width:100vw; background-color:antiquewhite;" >
+        <div class="" style="left: 88vw;width:8vw;top:2.5vh; min-width:50px; position: relative;">
+           <form id="MyForm" asp-action="Index" asp-controller="Upload" method="post">
+                @*<input hidden name="Description" value="Dfsdfsdgfd" />*@
+                <button class="btn btn-dark text-white w-100">Next</button>
+           </form>
+        </div>
+        <div class="" style="right:5vw;width:8vw;top:2.5vh; min-width:50px; position: relative;">
+            <form asp-action="Index" asp-controller="Upload" method="get">
+                <button class="p-0  text-decoration-underline fs-4 text-dark w-100" style="background-color:rgba(255,255,255,0); border:0px;">Go Back</button>
+            </form>
+        </div>
+    </div>
+</div>

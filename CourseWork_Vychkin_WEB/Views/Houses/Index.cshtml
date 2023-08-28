@@ -1,0 +1,131 @@
+﻿@model IEnumerable<CourseWork_Vychkin_WEB.Data.House>
+
+@{
+    ViewData["Title"] = "Index";
+    int count = 0;
+    int cardid = 0;
+    int IsModerated = 0;
+    try
+    {
+        IsModerated = ViewBag.IsModerated;
+    }
+    catch
+    {
+        
+    }
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+    <div class="btn-group">
+        <a asp-action="Index" asp-controller="Houses" class="btn @(IsModerated==0?"btn-primary":"btn-secondary")" asp-route-IsModerated="0">All</a>
+        <a asp-action="Index" asp-controller="Houses" class="btn @(IsModerated==1?"btn-primary":"btn-secondary")" asp-route-IsModerated="1">Is moderated</a>
+        <a asp-action="Index" asp-controller="Houses" class="btn @(IsModerated==2?"btn-primary":"btn-secondary")" asp-route-IsModerated="2">Non moderated</a>
+    </div>
+</p>
+<table class="table table-striped" style="margin-bottom:10vh;">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Images)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Price)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Address)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+            <tr style=" height:21vh;">
+                <td >
+                    <div style="max-height:25vh; height:25vh;" class="p-1">
+                        @if (@item.Images.Count == 1)
+                        {
+                            <img src="@item.Images.OrderByDescending(t=>t.IsMain).FirstOrDefault().Path" style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%' class="card-img-top">
+                        }
+                        else
+                        {
+                            <div id="@("carouselExample" + cardid)" class="carousel slide w-100 h-100" onmouseover="ChangeButtonDisplay(true,@cardid)"
+                         onmouseout="ChangeButtonDisplay(false,@cardid)"
+                         data-bs-interval="0" data-bs-ride="false">
+                                <div class="carousel-indicators" hidden id="indicators@(cardid)">
+                                    @foreach (var photo in item.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <button type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide-to="@count" class='@(count==0?"active":"")' aria-current="@(count==0?"true":"false")" aria-label="Slide 1"></button>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+
+
+                                </div>
+                                <div class="carousel-inner ">
+                                    @foreach (var photo in item.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <div class="@(count==0?"carousel-item active":"carousel-item") " style='width: 100%;height: 100%;'>
+                                            <img src="@photo.Path"
+                                     alt="Table Full of Spices"
+                                     style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%; max-height:25vh;' />
+                                        </div>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+                                </div>
+                                <button hidden id="prev@(cardid)" class="carousel-control-prev " style=" position:absolute; top:0%; left:0;" type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="prev">
+                                    <h4 class="bi bi-arrow-left-square-fill">
+                                    </h4>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button hidden id="next@(cardid)" class="carousel-control-next " type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="next">
+                                    <h4 class="bi bi-arrow-right-square-fill">
+                                    </h4>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div>
+
+                            count = 0;
+                            cardid++;
+
+                        }
+                   </div>
+            </td>
+            <td >
+                    <p style="max-height:25vh; overflow-y:auto; white-space:pre-line;">@Html.DisplayFor(modelItem => item.Description)</p>
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Price)
+            </td>
+            <td>
+                <p>
+                    @*@item.Address.AddressLabel, @item.Address.City, @item.Address.Country*@
+                    @item.Address.FormattedAddress
+                </p>
+            </td>
+            <td>
+                <div class="btn-group">
+                <a class="btn btn-outline-warning" asp-action="Edit" asp-route-id="@item.Id">Edit</a> 
+                <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a> 
+                <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                @if(item.IsModerated!=true)
+                {
+                 <a asp-action="Approve" class="btn btn-outline-success" asp-route-id="@item.Id">Approve</a>
+                }
+                </div>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

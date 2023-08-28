@@ -1,0 +1,293 @@
+﻿@using CourseWork_Vychkin_WEB.Models.ViewModels;
+@model IndexVM;
+@{
+    ViewData["Title"] = "Home Page";
+    int count = 0;
+    int cardid = 0;
+    int max;
+    int currentpage = 1;
+}
+@*<img src="https://theauburnhotel.com.au/wp-content/uploads/2017/07/500x500.png" style="width: 500px; height:500px" />
+<img src="https://theauburnhotel.com.au/wp-content/uploads/2017/07/500x500.png" style="width: 300px; height:300px" />
+<img src="https://theauburnhotel.com.au/wp-content/uploads/2017/07/500x500.png" style="width: 150px; height:150px" />*@
+
+<div class="row">
+    <div class="w-100 ">
+        <button class="btn btn-secondary w-100 text-center" data-bs-toggle="modal" data-bs-target="#exampleModal">filter</button>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form asp-action="Index" id="MyForm" asp-controller="Home" method="get" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Filter</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <div class="container ms-0 me-0">
+                        <h3>Price:</h3>
+                    <div>
+                                @await Component.InvokeAsync("PriceSlider",new {Prices=ViewBag.PriceSearch})
+                    </div>
+                    <hr />
+                        <h3>Categories:</h3>
+                       <div class="row" id="categories" style="max-height:20vh; overflow-y:scroll;">
+                            @{
+                                int countcat = 0;
+
+                            foreach (var item in ViewBag.Categories as List<Category>)
+                            {
+                                <div class="col-3">
+                                            <input type="checkbox"  name="Categories[]" value="@item.Id" id="category(@countcat)" autocomplete="off"
+                                               @(ViewBag.SelectedCategories!=null&&ViewBag.SelectedCategories.Contains(item.Id)?"checked":"")
+                                            class="btn-check"
+                                            >
+                                    <label class="btn w-100 fs-6 mt-3 " for="category(@countcat)" style="background-color: rgb(245,245,245)">@item.Name</label>
+                                </div>
+                                countcat++;
+                            }
+                            }
+                        </div>
+                        <hr />
+                            <h3>Tags:</h3>
+                    <div class="row" id="tags" style="max-height:20vh; overflow-y:scroll;"> 
+                        
+                        @{
+                                int counttag = 0;
+
+                            foreach (var item in ViewBag.Tags as List<Tag>)
+                            {
+                                <div class="col-3">
+                                <input type="checkbox" name="Tags[]" value="@item.Id" id="tag(@counttag)" autocomplete="off"
+                                               @(ViewBag.SelectedTags!=null&&ViewBag.SelectedTags.Contains(item.Id)?"checked":"")
+                                               class="btn-check">
+                                 <label class="btn w-100 fs-6 mt-3" for="tag(@counttag)" style="background-color: rgb(245,245,245)">
+                                 <div>
+                                 <img class="w-75" src="@item.ImagePath">
+                                                    <p class="m-0">@item.Name</p>
+                                 </div>
+                                 </label>
+                                </div>
+                                counttag++;
+                            }
+                            }
+                    </div>
+                    <h3>City: </h3>
+                    <div class="row" id="City" style="max-height:20vh;overflow-y:scroll;">
+                        @if(ViewBag.Countries!=null)
+                        {
+                          int countCountry=0;
+                          int countCity=0;
+                          foreach(var country in ViewBag.Countries)
+                          {
+
+                              <div>
+                                            <h6 class="DropdownCountry cursor-pointer" id="DropdownCountry@(countCountry)"><span id="IconCountry@(countCountry)" class="bi bi-caret-down-fill fs-6"></span> @country  <span>(<span id="CountCity@(countCountry)">@{
+                                                 var buf = ViewBag.SelectedCities as List<string>;    
+                                                 var buff = ViewBag.Cities as List<CityAndCountry>;
+                                                 @buff.Count(t=>t.Country==country&&buf.Contains(t.City));
+                                            }</span>/@{
+                                               
+                                                @buff.Count(t=>t.Country==country);
+                                            })</span>
+                                            </h6>
+                                  <div id="MenuCountry@(countCountry)" hidden>
+                                  @foreach(var city in ViewBag.Cities)
+                                  {
+                                     
+                                  
+                                    @if(city.Country==country)
+                                    {
+                                     <div class="form-check ">
+                                           <input type="checkbox"  name="Cities[]" value="@city.City" id="City@(countCity)OfCountry@(countCountry)"
+                                                   @(ViewBag.SelectedCities!=null&&ViewBag.SelectedCities.Contains(city.City)?"checked":"")
+                                               class="form-check-input CountryCheck cursor-pointer"
+                                               >
+                                          <label class="form-check-label cursor-pointer" for="City@(countCity)OfCountry@(countCountry)">
+                                               @city.City
+                                          </label>
+                                     </div>
+                                     countCity++;
+                                    }
+                                  }
+                                  </div>
+                              </div>
+                             countCountry++;
+                          }
+                        }
+                            </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button form="MyForm" type="submit" class="btn btn-primary">Filter</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<div class="row mt-2" >
+    
+    <div class="col">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4">
+           @if(Model.Houses!=null)
+                {
+                    @foreach (var item in Model.Houses)
+                    {
+                        <div class="col">
+                            <a asp-controller="Houses" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-black p-0 mb-4 me-4">
+                                <div class="card p-0 border-0">
+                                    @if (@item.Images.Count == 1)
+                                    {
+                                        <img src="@item.Images.OrderByDescending(t=>t.IsMain).FirstOrDefault().Path" style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%' class="card-img-top">
+                                    }
+                                    else
+                                    {
+                                        <div id="@("carouselExample" + cardid)" class="carousel slide w-100 h-100" onmouseover="ChangeButtonDisplay(true,@cardid)"
+                                 onmouseout="ChangeButtonDisplay(false,@cardid)"
+                                 data-bs-interval="0" data-bs-ride="false">
+                                            <div class="carousel-indicators" hidden id="indicators@(cardid)">
+                                                @foreach (var photo in item.Images.OrderByDescending(t=>t.IsMain))
+                                                {
+                                                    <button type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide-to="@count" class='@(count==0?"active":"")' aria-current="@(count==0?"true":"false")" aria-label="Slide 1"></button>
+                                                    count++;
+                                                }
+                                                @{
+                                                    count = 0;
+                                                }
+
+
+                                            </div>
+                                            <div class="carousel-inner ">
+                                                @foreach (var photo in item.Images.OrderByDescending(t=>t.IsMain))
+                                                {
+                                                    <div class="@(count==0?"carousel-item active":"carousel-item") " style='width: 100%;height: 100%;'>
+                                                        <img src="@photo.Path"
+                                             alt="Table Full of Spices"
+                                             style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%' />
+                                                    </div>
+                                                    count++;
+                                                }
+                                                @{
+                                                    count = 0;
+                                                }
+                                            </div>
+                                            <button hidden id="prev@(cardid)" class="carousel-control-prev " style=" position:absolute; top:0%; left:0;" type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="prev">
+                                                <h1 class="bi bi-arrow-left-square-fill">
+                                                </h1>
+                                                <span class="visually-hidden">Previous</span>
+                                            </button>
+                                            <button hidden id="next@(cardid)" class="carousel-control-next " type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="next">
+                                                <h1 class="bi bi-arrow-right-square-fill">
+                                                </h1>
+                                                <span class="visually-hidden">Next</span>
+                                            </button>
+
+                                        </div>
+
+                                        count = 0;
+                                        cardid++;
+
+                                    }
+                                    @*<img src="@item.Images.First().Path" style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%' class="card-img-top" alt="photo">*@
+                                    <div class="card-body">
+                                        <h6 class="card-title mb-0">@item.Address.City, @item.Address.Country</h6>
+                                        <p class="card-text mb-0">@item.Category.Name</p>
+                                        <p class="card-text mb-0"><small class="text-body-secondary">@item.Rooms Rooms, @(item.SquareMeter)m^2</small></p>
+                                        <div class=" d-flex"><p class="card-text"><span class="fw-bold">@item.Price zł</span>  noc</p></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                }
+            </div>
+    </div>
+    
+</div>
+<div class="row mt-2 w-100" style="margin-bottom:10vh">
+    @if(Model.PageCount>1)
+        {
+            <div class="d-flex w-100 justify-content-center">
+                <ul class="pagination">
+                    @for (int i = 1; i <= Model.PageCount; i++)
+                    {
+                        currentpage = i;
+                        <li class="@(i==Model.Page ? "page-item active" : "page-item" )">
+                            <a class="page-link pageselector cursor-pointer" id="Page@(i)">@i</a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+    </div>
+<script>
+    
+    $(".DropdownCountry").on("click",(e)=>{
+        let id = e.currentTarget.id.slice(-1);
+        let icon = $(`#IconCountry${id}`);
+        if(icon.hasClass("bi-caret-down-fill"))
+        {
+            icon.removeClass("bi-caret-down-fill");
+            icon.addClass("bi-caret-up-fill");
+            let menu = document.getElementById(`MenuCountry${id}`);
+            menu.hidden=false;
+        }
+        else
+        {
+            icon.removeClass("bi-caret-up-fill");
+            icon.addClass("bi-caret-down-fill");
+            let menu = document.getElementById(`MenuCountry${id}`);
+            menu.hidden=true;
+        }
+    });
+        $(".CountryCheck").on("change", (e) => {
+            let id = e.target.id.slice(-1);
+            if (e.target.checked) {
+                let count = $(`#CountCity${id}`).text();
+                count++;
+                $(`#CountCity${id}`).text(count);
+            }
+            else {
+                let count = $(`#CountCity${id}`).text();
+                count--;
+                $(`#CountCity${id}`).text(count);
+            }
+        });
+        $(".pageselector").on("click",(e)=>{
+            e.preventDefault();
+            console.log("dsada");
+            let id = e.currentTarget.id.slice(-1);
+            var currentUrl = window.location.href;
+            var url = new URL(currentUrl);
+            url.searchParams.set("Page",id);
+            //console.log(url);
+            window.location.href = url;
+        })
+    document.getElementById("MyForm").addEventListener("submit", function (e) {
+    e.preventDefault(); // Предотвращаем отправку формы
+
+    // Получаем все выбранные значения из формы
+    var selectedCategories = [...document.querySelectorAll("input[name='Categories[]']:checked")].map(el => el.value);
+    var selectedTags = [...document.querySelectorAll("input[name='Tags[]']:checked")].map(el => el.value);
+    var selectedCities = [...document.querySelectorAll("input[name='Cities[]']:checked")].map(el => el.value);
+    var minPrice = document.getElementById("amount_min").value; // Пример ID элемента минимальной цены
+    var maxPrice = document.getElementById("amount_max").value; // Пример ID элемента максимальной цены
+
+    // Формируем параметры для URL
+    var params = new URLSearchParams();
+    selectedCategories.forEach(category => params.append("Categories", category));
+    selectedTags.forEach(tag => params.append("Tags", tag));
+    selectedCities.forEach(city => params.append("Cities", city));
+    if (minPrice) params.append("Min", minPrice);
+    if (maxPrice) params.append("Max", maxPrice);
+
+    // Формируем полный URL с параметрами
+    var url = "/Home/Index?" + params.toString();
+
+    // Перенаправляем на сформированный URL
+    window.location.href = url;
+});
+
+</script>

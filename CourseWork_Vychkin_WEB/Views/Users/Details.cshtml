@@ -1,0 +1,248 @@
+﻿@using System.Security.Claims;
+
+@model UserVM
+@{
+	 int count = 0;
+    int cardid = 0;
+    int IsModerated = 0;
+     var identity = User.Identity as ClaimsIdentity;
+    string Id ="";
+    if (identity != null && identity.IsAuthenticated) {
+        var claim  = identity.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        Id = claim != null ? claim.Value : "";
+    }
+    try
+    {
+        IsModerated = Model.IsModerated;
+    }
+    catch
+    {
+
+    }
+}
+<div class="row">
+
+    <div class="modal fade" id="DisplayNameModal" tabindex="-1" aria-labelledby="DisplayNameModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Change display name</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container ms-0 me-0">
+
+                        <form asp-action="ChangeDisplayName" asp-controller="Users" method="post" id="ChangeDisplayNameForm" enctype="multipart/form-data">
+                            <input type="hidden" asp-for="Id" />
+                            <input type="hidden" name="CurrentId" value="@Id" />
+                            <label class="form-label" asp-for="DisplayName">
+
+                            </label>
+                            <input asp-for="DisplayName" class="form-control" />
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button form="ChangeDisplayNameForm" type="submit" class="btn btn-success">Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row w-100" style="height: 75vh; margin-bottom:10vh; box-shadow: -2px 6px 15px -1px rgba(66, 68, 90, 1); border-radius:3%">
+	<div class="col-2">
+        <div class="row h-50" style="border-bottom: 2px solid black; border-right:2px solid black">
+			<div class="p-2 ">
+                <img src="@Model.ImagePath" alt="avatar" class="profile-pic w-100" style="height:25vh; border-radius:50%;">
+                <h3 class="m-0 w-100 text-center">@Model.DisplayName</h3>
+                @if(Model.Id==Id)
+                {
+                    <div>
+                        <button class=" btn btn-sm btn-outline-secondary text-center w-100" data-bs-toggle="modal" data-bs-target="#DisplayNameModal">Change display name</button>
+                    </div>
+                }
+            </div>
+		</div>
+        <div class="row h-50" style=" border-right:2px solid black">
+            <div>    
+                <div class=" w-100 mt-3"><a class="btn @(Model.Menu==1?"btn-primary":"btn-secondary") w-100 p-3 " asp-action="Details" asp-route-Id="@Model.Id" asp-route-Menu="1">Houses</a></div>
+                <div class=" w-100 mt-3"><a class="btn @(Model.Menu==2?"btn-primary":"btn-secondary") w-100 p-3 " asp-action="Details" asp-route-Id="@Model.Id" asp-route-Menu="2">Rents</a></div>
+            </div>
+		</div>
+	</div>
+    <div class="col m-0 p-0">
+        @if(Model.Menu==1)
+        {
+            <div class="w-100 p-3 row m-0" style="border-bottom:2px  solid black">
+                <h2>Houses:</h2>
+            </div>
+
+            <div class="row p-2 m-0" style="border-bottom:2px  solid black">
+            <div class="btn-group">
+                <a asp-action="Details" asp-controller="Users" class="btn @(IsModerated==0?"btn-primary":"btn-secondary")" asp-route-IsModerated="0" asp-route-Id="@Model.Id" asp-route-Menu="1" >All</a>
+                <a asp-action="Details" asp-controller="Users" class="btn @(IsModerated==1?"btn-primary":"btn-secondary")" asp-route-IsModerated="1" asp-route-Id="@Model.Id" asp-route-Menu="1" >Is moderated</a>
+                <a asp-action="Details" asp-controller="Users" class="btn @(IsModerated==2?"btn-primary":"btn-secondary")" asp-route-IsModerated="2" asp-route-Id="@Model.Id" asp-route-Menu="1" >Non moderated</a>
+            </div>
+            </div>
+            <div class="row m-0 me-1" style="overflow-y:auto; max-height:56vh;">
+                @foreach(var item in Model.Houses)
+                {
+                    <div class="col-4 pt-2">
+                        <a asp-controller="Houses" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-black p-0 mb-4 me-4">
+                        <div class="card p-0 border-0 ">
+                        @if (@item.Images.Count == 1)
+                        {
+                            <div>
+                                        <img src="@item.Images.OrderByDescending(t=>t.IsMain).FirstOrDefault().Path" style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%; max-height:35vh;'>
+                            </div>
+                        }
+                        else
+                        {
+                            <div id="@("carouselExample" + cardid)" class="carousel slide w-100 h-100" onmouseover="ChangeButtonDisplay(true,@cardid)"
+                     onmouseout="ChangeButtonDisplay(false,@cardid)"
+                     data-bs-interval="0" data-bs-ride="false">
+                                <div class="carousel-indicators" hidden id="indicators@(cardid)">
+                                    @foreach (var photo in item.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <button type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide-to="@count" class='@(count==0?"active":"")' aria-current="@(count==0?"true":"false")" aria-label="Slide 1"></button>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+
+
+                                </div>
+                                <div class="carousel-inner  ">
+                                    @foreach (var photo in item.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <div class="@(count==0?"carousel-item active":"carousel-item") " style='width: 100%;height: 100%;'>
+                                            <img src="@photo.Path"
+                                 alt="Table Full of Spices"
+                                 style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%; max-height:35vh;' />
+                                        </div>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+                                </div>
+                                <button hidden id="prev@(cardid)" class="carousel-control-prev " style=" position:absolute; top:0%; left:0;" type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="prev">
+                                    <h4 class="bi bi-arrow-left-square-fill">
+                                    </h4>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button hidden id="next@(cardid)" class="carousel-control-next " type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="next">
+                                    <h4 class="bi bi-arrow-right-square-fill">
+                                    </h4>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div>
+
+                            count = 0;
+                            cardid++;
+
+                        }
+                                <div class="card-body">
+                                    <h6 class="card-title mb-0">@item.Address.City, @item.Address.Country</h6>
+                                    <p class="card-text mb-0">@item.Category.Name</p>
+                                    <p class="card-text mb-0"><small class="text-body-secondary">@item.Rooms Rooms, @(item.SquareMeter)m^2</small></p>
+                                    <div class=" d-flex"><p class="card-text"><span class="fw-bold">@item.Price zł</span>  noc</p></div>
+                                </div>
+                    </div>
+                        
+                        </a>
+                    </div>
+                }
+            </div>
+        }
+        else if(Model.Menu==2)
+        {
+            <div class="w-100" style="border-bottom:2px  solid black">
+                <h2>Rents:</h2>
+            </div>
+            <div class="row m-0 me-1" style="overflow-y:auto; max-height:67vh;">
+                @foreach(var item in Model.Rents)
+                {
+                    <div class="col-6 mt-2">
+                        <div class="d-flex">
+                        <a asp-controller="Houses" asp-action="Details" asp-route-id="@item.Id" class="text-decoration-none text-black p-0 mb-4 me-4 w-50">
+                            <div class=" p-0 border-0">
+                                @if (item.House.Images.Count == 1)
+                                {
+                                    <img src="@item.House.Images.OrderByDescending(t=>t.IsMain).FirstOrDefault().Path" style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%' class="card-img-top">
+                                }
+                                else
+                                {
+                                    <div id="@("carouselExample" + cardid)" class="carousel slide w-100 h-100" style="max-height:35vh;" onmouseover="ChangeButtonDisplay(true,@cardid)"
+                             onmouseout="ChangeButtonDisplay(false,@cardid)"
+                             data-bs-interval="0" data-bs-ride="false">
+                                        <div class="carousel-indicators" hidden id="indicators@(cardid)">
+                                            @foreach (var photo in item.House.Images.OrderByDescending(t => t.IsMain))
+                                            {
+                                                <button type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide-to="@count" class='@(count==0?"active":"")' aria-current="@(count==0?"true":"false")" aria-label="Slide 1"></button>
+                                                count++;
+                                            }
+                                            @{
+                                                count = 0;
+                                            }
+
+
+                                        </div>
+                                        <div class="carousel-inner ">
+                                            @foreach (var photo in item.House.Images.OrderByDescending(t => t.IsMain))
+                                            {
+                                                    <div class="@(count==0?"carousel-item active":"carousel-item") " style='width: 100%;height: 100%;max-height:35vh'>
+                                                    <img src="@photo.Path"
+                                         alt="Table Full of Spices"
+                                         style='object-fit: cover; width: 100%;height: 100%; border-radius: 5%; max-height:35vh;' />
+                                                </div>
+                                                count++;
+                                            }
+                                            @{
+                                                count = 0;
+                                            }
+                                        </div>
+                                        <button hidden id="prev@(cardid)" class="carousel-control-prev " style=" position:absolute; top:0%; left:0;" type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="prev">
+                                            <h4 class="bi bi-arrow-left-square-fill">
+                                            </h4>
+                                            <span class="visually-hidden">Previous</span>
+                                        </button>
+                                        <button hidden id="next@(cardid)" class="carousel-control-next " type="button" data-bs-target="#@("carouselExample" + cardid)" data-bs-slide="next">
+                                            <h4 class="bi bi-arrow-right-square-fill">
+                                            </h4>
+                                            <span class="visually-hidden">Next</span>
+                                        </button>
+
+                                    </div>
+
+                                    count = 0;
+                                    cardid++;
+
+                                }
+                            </div>
+                            
+                        </a>
+                        <div class="mt-3">
+                                <h4 class="card-title mb-0">@item.House.Address.City, @item.House.Address.Country</h4>
+                                <h6 class="card-text mb-0">@item.House.Category.Name</h6>
+                                <h6 class="card-text mb-0"><small class="text-body-secondary">@item.House.Rooms Rooms, @(item.House.SquareMeter)m^2</small></h6>
+                                <div class=" d-flex"><p class="card-text"><span class="fw-bold">@item.House.Price zł</span>  noc</p></div>
+                                @{
+                                    var from = DateTime.Parse(item.From);
+                                    var to = DateTime.Parse(item.To);
+                                }
+                                <h6>@from.ToShortDateString() - @to.ToShortDateString()</h6>
+                                 <div class=" d-flex"><p class="card-text"><span class="fw-bold">@item.Price zł</span>  for rent</p></div>
+                        </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

@@ -1,0 +1,49 @@
+﻿@model CreateHouseVM
+<div class="row w-100">
+    <h1 class="w-100 text-center">Choose address</h1>
+</div>
+<div class="row" style="margin-bottom:20vh">
+    <div style=" width:20vw; position: absolute;top:9vh; left:80%;z-index:3; height:72vh; padding-top:10vh; border:2px,solid,grey; border-bottom-left-radius:5%; border-top-left-radius:5%;" class="bg-light container" id="placefield" hidden>
+        <label class="form-label w-100">
+            Address:
+            <span asp-validation-for="Address.AddressLabel" class="text-danger"></span>
+            <input form="MyForm" asp-for="Address.AddressLabel" type="text" as readonly id="placeTitle" class="form-control w-100" />
+        </label>
+        <label class="form-label w-100">
+            Detailed addres:
+            <span asp-validation-for="Address.FormattedAddress" class="text-danger"></span>
+            <input form="MyForm" asp-for="Address.FormattedAddress" type="text" readonly id="placeAddress" class="form-control w-100" />
+        </label>
+        <label class="form-label w-100">
+            City&Country:
+            <input type="text" readonly id="placeWhere" class="form-control w-100" />
+        </label>
+        <input form="MyForm" type="hidden" asp-for="Address.Country" id="placeCountry" />
+        <input form="MyForm" type="hidden" asp-for="Address.City" id="placeCity" />
+        <input form="MyForm" type="hidden" asp-for="Address.Latitude" id="placeLatitude" />
+        <input form="MyForm" type="hidden" asp-for="Address.Longitude" id="placeLongitude" />
+        <p hidden id="placeCoordinates"></p>
+    </div>
+    @await Component.InvokeAsync("Map",new {Width=100,Height=60})
+</div>
+<div class="w-100">
+    <div class="d-flex" style="height:10vh;position:absolute; left:0px; bottom:9vh;width:100vw; background-color:antiquewhite;" >
+        <div class="" style="left: 88vw;width:8vw;top:2.5vh; min-width:50px; position: relative;">
+           <form id="MyForm" asp-action="Index" asp-controller="Upload" method="post">
+                @*<input hidden name="Description" value="Dfsdfsdgfd" />*@
+                <input hidden name="Category" value="@Model.Category"/>
+                @foreach(var item in Model.Tags)
+                {
+                    <input name="Tags[]" hidden value="@item" />
+                }
+                <button class="btn btn-dark text-white w-100">Next</button>
+           </form>
+        </div>
+        <div class="" style="right:5vw;width:8vw;top:2.5vh; min-width:50px; position: relative;">
+            <form asp-action="Index" asp-controller="Upload" method="post">
+                <input hidden name="Category" value="@Model.Category" />
+                <button class="p-0  text-decoration-underline fs-4 text-dark w-100" style="background-color:rgba(255,255,255,0); border:0px;">Go Back</button>
+            </form>
+        </div>
+    </div>
+</div>

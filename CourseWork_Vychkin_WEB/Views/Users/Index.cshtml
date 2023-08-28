@@ -1,0 +1,41 @@
+﻿@model List<UserWithRolesVM>
+
+<table class="table table-striped">
+	<thead>
+		<tr>
+			<th>Id</th>
+			<th>DisplayName</th>
+			<th>Login</th>
+			<th>Email</th>
+			<th>Roles</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach(var item in Model)
+		{
+			<tr>
+				<td>@item.User.Id</td>
+				<td>@item.User.DisplayName</td>
+				<td>@item.User.UserName</td>
+				<td>@item.User.Email</td>
+				<td>
+					@foreach(var role in item.Roles)
+					{
+						<p class="m-0">@role</p>
+					}
+				</td>
+				<td>
+					<div class="btn-group">
+						<a class="btn btn-outline-primary"  asp-action="Details" asp-controller="Users" asp-route-Id="@item.User.Id">Details</a>
+						<a class="btn btn-outline-danger"  asp-action="Delete" asp-controller="Users" asp-route-Id="@item.User.Id">Delete</a>
+						@if(!item.Roles.Contains("Admin"))
+						{
+							<a class="btn btn-outline-success" asp-action="AddRole" asp-controller="Users" asp-route-Id="@item.User.Id">GetAdmin</a>
+						}
+					</div>
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>

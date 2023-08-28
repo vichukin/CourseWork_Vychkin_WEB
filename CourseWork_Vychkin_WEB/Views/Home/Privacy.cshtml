@@ -1,0 +1,16 @@
+﻿@using System.Security.Claims;
+@{
+    var identity = User.Identity as ClaimsIdentity;
+}
+<ul>
+
+    @foreach (var item in identity.Claims)
+    {
+        <li>@item</li>
+    }
+</ul>
+@*<script>
+    $(document).ready(function () {
+        $('.toast').toast('show');
+    });
+</script>*@

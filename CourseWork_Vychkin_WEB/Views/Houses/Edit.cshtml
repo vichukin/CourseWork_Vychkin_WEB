@@ -1,0 +1,439 @@
+﻿@model PrepareForHouseEditVM
+
+@{
+    ViewData["Title"] = "Details";
+    int count = 0;
+}
+<form asp-action="Edit" id="MyForm" asp-controller="Houses" method="post" enctype="multipart/form-data">
+    <input hidden name="Id" value="@Model.House.Id" />
+    <input hidden name="id" value="@Model.House.Id" />
+</form>
+<div class="row">
+
+    <div class="modal fade" id="TagsModal" tabindex="-1" aria-labelledby="TagsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Tags</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="container ms-0 me-0">
+                        <div class="row">
+                            @{
+                                int counttag = 0;
+                            }
+                            @foreach (var item in Model.Tags)
+                            {
+
+                                <div class="col-3">
+                                    <input type="checkbox" form="MyForm" name="Tags[]" value="@item.Value" autocomplete="off" id="tag@(counttag)" class="btn-check"
+                                       @(Model.House.Tags.Count(t=>t.Id==int.Parse(item.Value))>0 ? "checked" : "")>
+                                    <label class="btn w-100 fs-6 mt-3 " for="tag@(counttag)" style="background-color: rgb(245,245,245)">@item.Text</label>
+                                </div>
+                                counttag++;
+                            }
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button form="MyForm" type="submit" class="btn btn-primary">Change</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="modal fade" id="CategoryModal" tabindex="-1" aria-labelledby="CategoryModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Category</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="container ms-0 me-0">
+                            <div class="row">
+                                @{
+                                    int countcat = 0;
+                                }
+                                @foreach (var item in Model.Categories)
+                                {
+
+                                    <div class="col-3">
+                                        <input type="radio" form="MyForm" name="Category" value="@item.Value" autocomplete="off" id="category@(countcat)" class="btn-check"
+                                           @(Model.House.Category.Id==int.Parse(item.Value) ? "checked" : "")>
+                                        <label class="btn w-100 fs-6 mt-3 " for="category@(countcat)" style="background-color: rgb(245,245,245)">@item.Text</label>
+                                    </div>
+                                    countcat++;
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button form="MyForm" type="submit" class="btn btn-primary">Change</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="modal fade" id="ChangeMainImageModal" tabindex="-1" aria-labelledby="ChangeMainImageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Images</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="container ms-0 me-0">
+                            <h2>Choose main image</h2>
+                            <form asp-action="ChangeMainImage" asp-controller="Images" method="post" id="ChainImageForm">
+                                <div class="row">
+                                    @{
+                                        int countimg = 0;
+                                    }
+
+
+                                    <input hidden value="@Model.House.Id" name="Id" />
+                                    @foreach (var item in Model.House.Images)
+                                    {
+
+                                        <div class="col-6">
+                                            <input type="radio" class="btn-check" name="MainImage" value='@item.Id' id="Image@(countimg)" autocomplete="off" @(item.IsMain?"checked":"")>
+                                            <label class="btn w-100 h-100" for="Image@(countimg)"><img class='w-100 h-100' src="@item.Path" /></label>
+                                        </div>
+                                        countimg++;
+                                    }
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button form="ChainImageForm" type="submit" class="btn btn-primary">Change</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="modal fade" id="RemoveImageModal" tabindex="-1" aria-labelledby="RemoveImageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Images</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="container ms-0 me-0">
+                            <h2>Choose images for delete</h2>
+                            <form asp-action="Delete" asp-controller="Images" method="post" id="RemoveImageForm">
+                                <div class="row">
+                                    @{
+                                        int countdelimage = 0;
+                                    }
+
+
+                                    <input hidden value="@Model.House.Id" name="Id" />
+                                    @foreach (var item in Model.House.Images)
+                                    {
+
+                                        <div class="col-6">
+                                            <input type="checkbox" class="btn-check" name="Images[]" value='@item.Id' id="DelImage@(countdelimage)" autocomplete="off">
+                                            <label class="btn w-100 h-100" for="DelImage@(countdelimage)"><img class='w-100 h-100' src="@item.Path" /></label>
+                                        </div>
+                                        countdelimage++;
+                                    }
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button form="RemoveImageForm" type="submit" class="btn btn-danger">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+
+        <div class="modal fade" id="AddImageModal" tabindex="-1" aria-labelledby="AddImageModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Images</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="container ms-0 me-0">
+                            
+                            <form asp-action="Add" asp-controller="Images" method="post" id="AddImageForm" enctype="multipart/form-data">
+                                <div class="row">
+
+
+                                    <input hidden value="@Model.House.Id" name="Id" />
+                                    <div class="col">
+                                        <label class="form-label">
+                                            <h3>Choose images</h3>
+                                            <input type="file" name="Images" class="form-control" accept="image/*" multiple />
+                                        </label>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button form="AddImageForm" type="submit" class="btn btn-success">Add</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+        <div class="modal fade" id="AddressModal" tabindex="-1" aria-labelledby="AddressModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="exampleModalLabel">Address</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="container ms-0 me-0">
+                            
+                            <form asp-action="ChangeAddress" asp-controller="Houses" method="post" id="ChangeAddressForm" enctype="multipart/form-data">
+                                <div class="row">
+
+
+                                    <input hidden value="@Model.House.Id" name="HouseId" />
+                                    <input hidden value="@Model.House.Address.Id" name="Id" />
+                                    
+                                    @await Component.InvokeAsync("Map",new {Width=100,Height=50})
+                                    <div  class="bg-light mt-2" id="placefield" style="border-radius:5%" hidden>
+                                        <label class="form-label w-100">
+                                            Address:
+                                            <input  name="AddressLabel" type="text" as readonly id="placeTitle" class="form-control w-100" />
+                                        </label>
+                                        <label class="form-label w-100">
+                                            Detailed addres:
+                                            <input name="FormattedAddress" type="text" readonly id="placeAddress" class="form-control w-100" />
+                                        </label>
+                                        <label class="form-label w-100">
+                                            City&Country:
+                                            <input type="text" readonly id="placeWhere" class="form-control w-100" />
+                                        </label>
+                                        <input  type="hidden" name="Country" id="placeCountry" />
+                                        <input  type="hidden" name="City" id="placeCity" />
+                                        <input  type="hidden" name="Latitude" id="placeLatitude" />
+                                        <input  type="hidden" name="Longitude" id="placeLongitude" />
+                                        <p hidden id="placeCoordinates"></p>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button form="ChangeAddressForm" type="submit" class="btn btn-success">Change</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="margin-bottom:10vh">
+        <div class="col col-md-9 col-sm-12 col-12">
+            <div class="row w-100">
+                <div class="d-flex h-100" style="max-height: 650px">
+                    @if (Model.House.Images.Count == 1)
+                    {
+
+                    }
+                    else
+                    {
+                        <div class="w-50 h-100" id="imageList" style="overflow-y:scroll;max-height: 650px">
+                            @foreach (var photo in Model.House.Images.OrderByDescending(t => t.IsMain))
+                            {
+                                @* <button type="button" class="btn-outline-light">*@
+                                <img style="height:35%;" src="@photo.Path" class="w-100 " data-bs-target="#carouselExample" data-bs-slide-to="@count" />
+
+                                @*</button>*@
+
+                                count++;
+
+
+                            }
+                            @{
+                                count = 0;
+                            }
+
+
+                        </div>
+                    }
+                    <div class="w-100">
+
+                        @if (Model.House.Images.Count == 1)
+                        {
+                            <img src="@Model.House.Images.OrderByDescending(t=>t.IsMain).FirstOrDefault().Path" style='object-fit: cover; width: 100%;height: 100%; ' class="card-img-top">
+                        }
+                        else
+                        {
+                            <div id="@("carouselExample")" class="carousel slide w-100 h-100"
+                             data-bs-interval="0" data-bs-ride="false">
+                                <div class="carousel-indicators" id="indicators">
+                                    @foreach (var photo in Model.House.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <button type="button" data-bs-target="#@("carouselExample")" data-bs-slide-to="@count" class='@(count==0?"active":"")' aria-current="@(count==0?"true":"false")" aria-label="Slide 1"></button>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+
+
+                                </div>
+                                <div class="carousel-inner w-100 h-100">
+                                    @foreach (var photo in Model.House.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <div class="@(count==0?"carousel-item active":"carousel-item") " style='width: 100%;height: 100%;'>
+                                            <img src="@photo.Path"
+                                         alt="Table Full of Spices"
+                                         style='object-fit: cover; width: 100%;height: 100%; ' />
+                                        </div>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+                                </div>
+                                <button id="prev" class="carousel-control-prev " style=" position:absolute; top:0%; left:0;" type="button" data-bs-target="#@("carouselExample")" data-bs-slide="prev">
+                                    <h1 class="bi bi-arrow-left-square-fill">
+                                    </h1>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button id="next" class="carousel-control-next " type="button" data-bs-target="#@("carouselExample" )" data-bs-slide="next">
+                                    <h1 class="bi bi-arrow-right-square-fill">
+                                    </h1>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div>
+
+                            count = 0;
+
+                        }
+                    </div>
+                </div>
+                <h3>Change images</h3>
+                <div class="btn-group">
+                    <button class="btn btn-outline-success text-center" data-bs-toggle="modal" data-bs-target="#AddImageModal">Add image</button>
+                    <button class="btn btn-outline-primary text-center" data-bs-toggle="modal" data-bs-target="#ChangeMainImageModal">Change main image</button>
+                    <button class="btn btn-outline-danger text-center" data-bs-toggle="modal" data-bs-target="#RemoveImageModal">Remove image</button>
+                </div>
+            </div>
+            <hr />
+            <div class="row w-100">
+                <h2>Description:</h2>
+                <textarea name="Description" form="MyForm">@Model.House.Description</textarea>
+
+
+            </div>
+            <hr />
+            <div class="row w-100">
+                <h2>You can find here:</h2>
+                @foreach (var item in Model.House.Tags)
+                {
+                    <div class="col col-lg-1 col-md-2 col-3">
+                        <div style="border-radius:15%; background-color:rgb(250,250,250);padding-left:0.5%;padding-right:0.5%;padding-top:0.5%; margin-right:1%">
+                            <img src="@item.ImagePath" style="border-radius:50%; width:100% ">
+                            <p class="fw-bold text-center mb-0">@item.Name</p>
+                        </div>
+                    </div>
+                }
+                <div>
+                    <button class="btn btn-outline-primary text-center" data-bs-toggle="modal" data-bs-target="#TagsModal">Change tags</button>
+                </div>
+            </div>
+            <hr />
+            <div class="row w-100">
+            <div class="col">
+                <h2>Address</h2>
+                <h6>@Model.House.Address.City @Model.House.Address.Country</h6>
+                <p>@Model.House.Address.AddressLabel</p>
+                <div class="w-100" style="height:50vh">
+                    @await Component.InvokeAsync("ShowAddress",new{Id=Model.House.Id})
+                </div>
+            </div>
+                <div>
+                    <button class="btn btn-outline-primary text-center" data-bs-toggle="modal" data-bs-target="#AddressModal">Change address</button>
+                </div>
+            </div>
+            <hr />
+            <div class="row w-100">
+                <div class="btn-group btn-group-lg w-50">
+                    <button class="btn btn-outline-success" form="MyForm">Save changes</button>
+                    <a class="btn btn-outline-primary" asp-action="Details" asp-route-Id="@Model.House.Id" >Back</a>
+                </div>
+            </div>
+        </div>
+        <div class="col ">
+            <div id="StickyItem" style="background-color: rgb(250,250,250);">
+                <div class="p-4">
+                    <div>
+                        <label class="form-label w-100">
+                        Price:
+                        <input class="form-control" name="Price" min="0" value="@Model.House.Price" form="MyForm" />
+                    </label>
+                </div>
+                <div>
+                    <label class="form-label w-100">
+                        Square meters:
+                        <input class="form-control" name="SquareMeter" min="0" value="@Model.House.SquareMeter" form="MyForm" />
+                    </label>
+                </div>
+                <div>
+                        <label class="form-label w-100 ">
+                        Rooms:
+                        <input class="form-control" name="Rooms" min="0" value="@Model.House.Rooms" form="MyForm" />
+                    </label>
+                </div>
+                <div>
+                        <button class="btn btn-outline-primary text-center w-100" data-bs-toggle="modal" data-bs-target="#CategoryModal">Change Category</button>
+                </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <script>
+        $(document).ready(function () {
+            $('.more-btn').on('click', function () {
+                $(this).hide();
+                $('.short-text').hide();
+                $('.full-text').show();
+            });
+        });
+    </script>

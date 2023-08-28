@@ -1,0 +1,41 @@
+﻿@model CreateHouseVM
+<div class="row w-100">
+    <h1 class="w-100 text-center">Write description</h1>
+</div>
+<div class="row" style="margin-bottom:20vh; height: 60vh;">
+    <div class="form-floating">
+        <textarea name="Description" form="MyForm" class="form-control w-100 h-100" placeholder="Leave a comment here" id="floatingTextarea"></textarea>
+        <label style="margin-left:2vw;" for="floatingTextarea">Descripton</label>
+    </div>
+</div>
+<div class="w-100">
+    <div class="d-flex" style="height:10vh;position:absolute; left:0px; bottom:9vh;width:100vw; background-color:antiquewhite;" >
+        <div class="" style="left: 88vw;width:8vw;top:2.5vh; min-width:50px; position: relative;">
+           <form id="MyForm" asp-action="Index" asp-controller="Upload" method="post">
+                <input hidden name="Category" value="@Model.Category"/>
+                @foreach (var item in Model.Tags)
+                {
+                        <input name="Tags[]" hidden value="@item" />
+                }
+                <input type="hidden" asp-for="Address.Country" value="@Model.Address.Country"  />
+                <input type="hidden" value="@Model.Address.City" asp-for="Address.City" />
+                <input type="hidden" value="@Model.Address.Latitude" asp-for="Address.Latitude"  />
+                <input type="hidden" value="@Model.Address.Longitude" asp-for="Address.Longitude"  />
+                <input type="hidden" value="@Model.Address.FormattedAddress" asp-for="Address.FormattedAddress"  />
+                <input type="hidden" value="@Model.Address.AddressLabel" asp-for="Address.AddressLabel"  />
+                <button class="btn btn-dark text-white w-100">Next</button>
+           </form>
+        </div>
+        <div class="" style="right:5vw;width:8vw;top:2.5vh; min-width:50px; position: relative;">
+            <form asp-action="Index" asp-controller="Upload" method="post">
+                <input hidden name="Category" value="@Model.Category"/>
+                @foreach (var item in Model.Tags)
+                {
+                            <input name="Tags[]" hidden value="item" />
+                }
+                <button class="p-0  text-decoration-underline fs-4 text-dark w-100" style="background-color:rgba(255,255,255,0); border:0px;">Go Back</button>
+            </form>
+        </div>
+    </div>
+</div>
+

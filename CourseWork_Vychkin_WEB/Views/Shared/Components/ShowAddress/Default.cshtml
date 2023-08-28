@@ -1,0 +1,50 @@
+﻿@model House
+@{
+}
+
+<div id="showMap" class="h-100 w-100 cursor-pointer"></div>
+
+<script type="text/javascript">
+
+
+
+
+    function setShowMarker(coord) {
+        showMarker.remove();
+        showMarker.setLngLat(coord).addTo(ShowMap);
+    }
+
+    async function initShowMap() {
+        let resp = await fetch("https://api.radar.io/v1/geocode/ip?publishableKey=prj_live_pk_ff66166841fc1450baf234f5399a2e564d01db92");
+        if (resp.ok === true) {
+            let data = await resp.json();
+            let adr = data.address;
+            startShowCoords = `@(Model.Address.Longitude),@(Model.Address.Latitude)`;
+            ShowMap = new maplibregl.Map({
+                container: 'showMap',
+                style: 'https://api.radar.io/maps/styles/radar-default-v1?publishableKey=prj_live_pk_ff66166841fc1450baf234f5399a2e564d01db92',
+                center: startShowCoords.split(','), // NYC
+                zoom: 11
+            });
+            ShowMap.on("click", async (event) => {
+
+                var url = "https://www.google.com/maps/place/@(Model.Address.Latitude),@(Model.Address.Longitude)";
+                window.open(url, "_blank");
+            });
+            //ShowMap.addControl(new maplibregl.NavigationControl());
+            ShowMap.easeTo({ center: [@Model.Address.Longitude, @Model.Address.Latitude] })
+            setShowMarker(startShowCoords.split(','));
+            //search.attributes("disabled",false);\ 
+        }
+    }
+
+    let startShowCoords;
+    //console.log(startCoords);
+    //console.log(startCoords.split(','));
+
+    let ShowMap;
+    let showMarker = new maplibregl.Marker();
+    initShowMap();
+   
+    
+</script>

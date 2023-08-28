@@ -1,0 +1,208 @@
+﻿
+@model CourseWork_Vychkin_WEB.Data.House
+
+@{
+    int count = 0;
+    var identity = User.Identity as ClaimsIdentity;
+    string Id = "";
+    bool IsAdmin = false;
+    if (identity != null && identity.IsAuthenticated)
+    {
+        var claim = identity.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+        Id = claim != null ? claim.Value : "";
+        claim = identity.FindAll("http://schemas.microsoft.com/ws/2008/06/identity/claims/role").FirstOrDefault(t => t.Value == "Admin");
+        IsAdmin = claim != null;
+    }
+}
+
+ <div class="row" style="margin-bottom:10vh">
+        <div class="col col-md-9 col-sm-12 col-12">
+            <div class="row w-100">
+                <div class="d-flex h-100" style="max-height: 650px">
+                    @if (Model.Images.Count == 1)
+                    {
+
+                    }
+                    else
+                    {
+                    <div class="w-50 h-100" id="imageList" style="overflow-y:scroll;max-height: 650px">
+                            @foreach (var photo in Model.Images.OrderByDescending(t => t.IsMain))
+                            {
+                                @* <button type="button" class="btn-outline-light">*@
+                                <img style="height:35%;" src="@photo.Path" class="w-100 " data-bs-target="#carouselExample" data-bs-slide-to="@count" />
+
+                                @*</button>*@
+
+                                count++;
+
+
+                            }
+                            @{
+                                count = 0;
+                            }
+
+
+                        </div>
+                    }
+                    <div class="w-100">
+
+                        @if (Model.Images.Count == 1)
+                        {
+                            <img src="@Model.Images.OrderByDescending(t=>t.IsMain).FirstOrDefault().Path" style='object-fit: cover; width: 100%;height: 100%; ' class="card-img-top">
+                        }
+                        else
+                        {
+                            <div id="@("carouselExample")" class="carousel slide w-100 h-100"
+                             data-bs-interval="0" data-bs-ride="false">
+                                <div class="carousel-indicators" id="indicators">
+                                    @foreach (var photo in Model.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <button type="button" data-bs-target="#@("carouselExample")" data-bs-slide-to="@count" class='@(count==0?"active":"")' aria-current="@(count==0?"true":"false")" aria-label="Slide 1"></button>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+
+
+                                </div>
+                                <div class="carousel-inner w-100 h-100">
+                                    @foreach (var photo in Model.Images.OrderByDescending(t => t.IsMain))
+                                    {
+                                        <div class="@(count==0?"carousel-item active":"carousel-item") " style='width: 100%;height: 100%;'>
+                                            <img src="@photo.Path"
+                                         alt="Table Full of Spices"
+                                         style='object-fit: cover; width: 100%;height: 100%; ' />
+                                        </div>
+                                        count++;
+                                    }
+                                    @{
+                                        count = 0;
+                                    }
+                                </div>
+                                <button id="prev" class="carousel-control-prev " style=" position:absolute; top:0%; left:0;" type="button" data-bs-target="#@("carouselExample")" data-bs-slide="prev">
+                                    <h1 class="bi bi-arrow-left-square-fill">
+                                    </h1>
+                                    <span class="visually-hidden">Previous</span>
+                                </button>
+                                <button id="next" class="carousel-control-next " type="button" data-bs-target="#@("carouselExample" )" data-bs-slide="next">
+                                    <h1 class="bi bi-arrow-right-square-fill">
+                                    </h1>
+                                    <span class="visually-hidden">Next</span>
+                                </button>
+
+                            </div>
+
+                            count = 0;
+
+                        }
+                    </div>
+                </div>
+            </div>
+            <hr />
+    <div class="row w-100">
+        <h2>Description:</h2>
+         @if(Model.Description.Length>200)
+        {
+            <span class="short-text">
+                @Model.Description.Substring(0,200)
+                <a class="more-btn">More...</a>
+            </span>
+            <span class="full-text">
+                @Model.Description
+            </span>
+        }
+        else
+        {
+            <span class="full-text" style="display:inline">
+                @Model.Description
+            </span>
+        }
+
+    </div>
+    <hr />
+    <div class="row w-100">
+        <h2>You can find here:</h2>
+            @foreach(var item in Model.Tags)
+            {
+                <div class="col col-lg-1 col-md-2 col-3">
+                <div style="border-radius:15%; background-color:rgb(250,250,250);padding-left:0.5%;padding-right:0.5%;padding-top:0.5%; margin-right:1%">
+                   <img src="@item.ImagePath" style="border-radius:50%; width:100% ">
+                    <p class="fw-bold text-center mb-0">@item.Name</p>
+                </div>
+                </div>
+            }
+    </div>
+    <hr />
+    <div class="row w-100">
+        <div class="col">
+                <h2>Address</h2>
+                <h6>@Model.Address.City @Model.Address.Country</h6>
+                <p>@Model.Address.AddressLabel</p>
+                <div class="w-100" style="height:50vh">
+                    @await Component.InvokeAsync("ShowAddress",new{Id=Model.Id})
+                </div>
+        </div>
+    </div>
+    @if(IsAdmin||Id==Model.User.Id)
+                {
+                    <hr />
+        <div class="row w-100" >
+            <div class="col">
+                
+                    <a class="btn btn-outline-warning btn-lg w-100" asp-action="Edit" asp-route-id="@Model?.Id">Edit this house</a> 
+                
+            </div>
+        </div>
+                }
+        </div>
+        <div class="col " >
+        <div id="StickyItem" style="background-color: rgb(250,250,250);">
+                <h4></h4>
+                <div style="background-color: rgb(240,240,240); height:15vh;" class="mt-2 p-3 mb-2 d-flex">
+
+                    <div  >
+                         <a asp-action="Details" asp-controller="Users" asp-route-Id="@Model.User.Id">
+                        <img src="@Model.User.ImagePath" alt="avatar" class="w-100" style="border-radius:50%;height:100%">
+                        </a>
+                    </div>
+                    <h6 class="ms-2">@(Model.User.DisplayName==""?"Uknown user": Model.User.DisplayName)</h6>
+                </div>
+                
+                @await Component.InvokeAsync("Calendar",Model.Id)
+                <form asp-action="RentHouse" method="post">
+                    <div class="d-flex">
+                        <input type="hidden" name="Id" value="@Model.Id" />
+                        <input type="hidden" name="From" placeholder="From" id="fromval" readonly class="form-control" />
+                        <input type="text" placeholder="From" id="from" readonly class="form-control" />
+                        <input type="hidden" name="To" placeholder="From" id="toval" readonly class="form-control" />
+                        <input type="text" placeholder="To" id="to" readonly class="form-control" />
+                        <input type="hidden" name="Price" id="priceValue" class="form-control" />
+                        <input type="hidden" name="CountOfDay" id="CODValue" class="form-control" />
+                    </div>
+                    @*<a asp-action="Details" asp-route-id="@Model.Id"></a>*@
+                    <div style="background-color: rgb(240,240,240)" class="mt-2 p-3 mb-2">
+                        <p class="form-label">
+                            Price for 1 night: <span class="fw-bold">@Model.Price zł</span>
+                        </p>
+                        <p id="priceField">
+                        </p>
+                        <button class="btn btn-success w-100">Rent</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    
+
+<script>
+    $(document).ready(function() {
+    $('.more-btn').on('click', function() {
+        $(this).hide();
+        $('.short-text').hide();
+        $('.full-text').show();
+    });
+});
+</script>

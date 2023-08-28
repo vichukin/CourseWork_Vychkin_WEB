@@ -1,0 +1,212 @@
+﻿@model House?
+@{
+    string start = "Mon Aug 21 2023";
+    string end = "Sun Aug 28 2023";
+}
+
+<div class="w-100">
+    <div class="d-flex h-50">
+        <button onclick="prevMonth()" class="btn"><span class=" bi bi-caret-left-square-fill " style="color: darkgray"></span></button>
+        <h5 id="calTitle" class="w-100 text-center m-0 ">Month 2023</h5>
+        <button onclick="nextMonth()" class="btn"><span class=" bi bi-caret-right-square-fill " style="color: darkgray"></span></button>
+    </div>
+    <table class="calendar">
+        <thead>
+            <tr>
+                <th>Mon</th>
+                <th>Tue</th>
+                <th>Wed</th>
+                <th>Th</th>
+                <th>Fr</th>
+                <th>Sat</th>
+                <th>Sun</th>
+            </tr>
+        </thead>
+        <tbody id="body">
+        </tbody>
+    </table>
+    
+</div>
+
+<script>
+    let from;
+    let to;
+    let now = new Date();
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+
+    let busyDates = [];
+    function dateIsBusy(date) {
+        const dateString = date.toDateString();
+        return busyDates.includes(dateString);
+    }
+    function prevMonth() {
+        currentMonth--;
+        if (currentMonth < 0) {
+            currentMonth = 11;
+            currentYear--;
+        }
+        updateCalendar();
+    }
+
+    function nextMonth() {
+        currentMonth++;
+        if (currentMonth > 11) {
+            currentMonth = 0;
+            currentYear++;
+        }
+        updateCalendar();
+    }
+
+    function updateCalendar() {
+        let date = new Date();
+        date.setDate(1);
+        date.setMilliseconds(1);
+        date.setSeconds(1);
+        date.setMinutes(1);
+        date.setHours(1);
+        //console.log(date);
+
+        date.setMonth(currentMonth);
+        date.setFullYear(currentYear);
+        let getMonth = date.toLocaleString('default', {
+            month: 'long',
+        });
+        $("#calTitle").text(`${getMonth}, ${currentYear}`);
+        //console.log(date.getFullYear());
+        //console.log(date.getMonth()+1);
+
+        date.setDate(1);
+        while (date.getDay() !== 1) {
+            date.setDate(date.getDate() - 1);
+        }
+        const start = date.getDate();
+        let str = "";
+        let toMonth = currentMonth + 1 > 11 ? 0 : currentMonth + 1;
+        while (date.getMonth() !== toMonth) {
+            str += "<tr>";
+            while (date.getDay() !== 0) {
+                if (date < now || dateIsBusy(date))
+                    str += "<td  class='non-active-day' >" + date.getDate() + "</td>";
+                else if (from !== undefined && date.getMonth() == from.getMonth() && date.getDate() == from.getDate() && date.getFullYear() == from.getFullYear())
+                    str += "<td  class='active-from' >" + date.getDate() + "</td>";
+                else if (to !== undefined && date.getMonth() == to.getMonth() && date.getDate() == to.getDate() && date.getFullYear() == to.getFullYear())
+                    str += "<td  class='active-to' >" + date.getDate() + "</td>";
+                else if (from !== undefined && to !== undefined && date > from && date < to)
+                    str += "<td  class='active-range active-day' >" + date.getDate() + "<p hidden>" + date.toDateString() + "</p>" + "</td>";
+                else
+                    str += "<td class='active-day'>" + date.getDate() + "<p hidden>" + date.toDateString() + "</p>" + "</td>";
+
+                date.setDate(date.getDate() + 1);
+            }
+            if (date < now || dateIsBusy(date))
+                str += "<td class='non-active-day'>" + date.getDate() + "</td>";
+            else if (from !== undefined && date.getMonth() == from.getMonth() && date.getDate() == from.getDate() && date.getFullYear() == from.getFullYear())
+                str += "<td  class='active-from' >" + date.getDate() + "</td>";
+            else if (to !== undefined && date.getMonth() == to.getMonth() && date.getDate() == to.getDate() && date.getFullYear() == to.getFullYear())
+                str += "<td  class='active-to' >" + date.getDate() + "</td>";
+            else if (from !== undefined && to !== undefined && date > from && date < to)
+                str += "<td  class='active-range active-day' >" + date.getDate() + "<p hidden>" + date.toDateString() + "</p>" + "</td>";
+            else
+                str += "<td class='active-day'>" + date.getDate() + "<p hidden>" + date.toDateString() + "</p>" + "</td>";
+            str += "</tr>";
+
+            date.setDate(date.getDate() + 1);
+        }
+        $("#body").html(str);
+        $(".active-day").click((event) => {
+            let datestr = event.target.children[0].innerHTML;
+            let bufdate = new Date(datestr);
+            bufdate.setMilliseconds(0);
+            bufdate.setSeconds(0);
+            bufdate.setMinutes(0);
+            bufdate.setHours(0);
+
+            if (from === undefined && to === undefined) {
+                let elem = $(".active-from");
+                from = bufdate;
+                $("#from").val(from.toLocaleDateString());
+                $("#fromval").val(from.toDateString());
+                console.log(bufdate.toDateString());
+                updateCalendar();
+            }
+            else if (to === undefined && bufdate > from && !dateIsInRange(bufdate)) {
+                let tr = from.getDate() / 7;
+                to = bufdate;
+                $("#to").val(to.toLocaleDateString());
+                $("#toval").val(to.toDateString());
+                updateCalendar();
+                let countOfNights = calculateDaysBetweenDates(from, to);
+                let night = countOfNights>1?"nights":"night";
+                let price = @Model.Price*countOfNights
+                $("#priceField").html(`Price for ${countOfNights} ${night}: <span class='fw-bold'>${price} zł</span>`).show();
+                $("#priceValue").val(price);
+                $("#CODValue").val(countOfNights);
+
+            }
+            else {
+                to = undefined;
+                $("#to").val("")
+                $("#priceField").html(``);
+                $("#priceValue").val(``);
+                $("#CODValue").val(``);
+                let elem = $(".active-from");
+                from = bufdate;
+                $("#from").val(bufdate.toLocaleDateString());
+                updateCalendar();
+            }
+        });
+    }
+
+    function addBusyRange(startDate, endDate) {
+        // Преобразуем даты в объекты JavaScript Date
+        let start = new Date(startDate);
+        let end = new Date(endDate);
+
+        // Используем цикл для добавления каждой даты в диапазоне в массив busyDates
+        while (start <= end) {
+            busyDates.push(start.toDateString());
+            //console.log(start);
+            start.setDate(start.getDate() + 1); // Увеличиваем дату на 1 день
+        }
+    }
+    function dateIsInRange(to) {
+        let start = new Date(from);
+        let end = new Date(to);
+
+        while (start <= end) {
+            let dateStr = start.toDateString();
+            if (busyDates.includes(dateStr)) {
+                return true; // Найдена занятая дата в диапазоне
+            }
+            start.setDate(start.getDate() + 1);
+        }
+
+        return false; // Занятых дат в диапазоне не найдено
+    }
+   
+    //addBusyRange('@start', '@end');
+    function calculateDaysBetweenDates(from, to) {
+
+        // Вычисляем разницу в миллисекундах между датами
+        const timeDifference = to.getTime() - from.getTime();
+
+        // Вычисляем количество дней, разделив разницу на количество миллисекунд в одном дне
+        const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+        return daysDifference;
+    }
+</script>
+@if(Model.Rents!=null)    
+{
+    foreach (var item in Model.Rents)
+    {
+        <script>
+            addBusyRange('@item.From', '@item.To')
+            
+        </script>
+    }
+    <script>
+        updateCalendar();
+    </script>
+}

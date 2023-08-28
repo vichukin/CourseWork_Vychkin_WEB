@@ -1,0 +1,141 @@
+﻿
+@model CreateHouseVM
+
+@{
+    ViewData["Title"] = "Create";
+}
+
+<h1>Create</h1>
+
+<h4>House</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" enctype="multipart/form-data" id="MyForm">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            @*<div class="form-group">
+                <label asp-for="Name" class="control-label"></label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>*@
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <textarea asp-for="Description" class="form-control" ></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Price" class="control-label"></label>
+                <input asp-for="Price" min="0" class="form-control" />
+                <span asp-validation-for="Price" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SquareMeter" class="control-label"></label>
+                <input asp-for="SquareMeter" min="0" class="form-control" />
+                <span asp-validation-for="SquareMeter" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Rooms" class="control-label"></label>
+                <input asp-for="Rooms" min="0" class="form-control" />
+                <span asp-validation-for="Rooms" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Category" class="control-label"></label>
+                <select asp-for="Category" class="form-select" asp-items="ViewBag.Categories"></select>
+                <span asp-validation-for="Category" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Tags" class="control-label"></label>
+                <select asp-for="Tags" class="form-select" multiple asp-items="ViewBag.Tags"></select>
+                <span asp-validation-for="Tags" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Images" class="control-label"></label>
+                <input asp-for="Images" type="file" id="fileInput" accept="image/*" multiple class="form-control" />
+                <span asp-validation-for="Images" class="text-danger"></span>
+            </div>
+            <div class="form-group">     
+                
+                <label asp-for="Address" class="control-label"></label>
+                
+                @await Component.InvokeAsync("Map",new {Width=100,Height=40})
+ <div style=" width:100%; height:100%; border:2px,solid,grey; border-bottom-right-radius:5%; border-top-right-radius:5%;" class="bg-light container" id="placefield" hidden>
+            <label  class="form-label w-100">
+                Address:
+                <span asp-validation-for="Address.AddressLabel" class="text-danger"></span>
+                <input asp-for="Address.AddressLabel" type="text" as readonly id="placeTitle"  class="form-control w-100" />
+            </label>
+            <label class="form-label w-100">
+                Detailed addres:
+                <span asp-validation-for="Address.FormattedAddress" class="text-danger"></span>
+                <input asp-for="Address.FormattedAddress" type="text" readonly id="placeAddress" class="form-control w-100" />
+            </label>
+            <label class="form-label w-100">
+                City&Country:
+                <input type="text" readonly id="placeWhere" class="form-control w-100" />
+            </label>
+            <input type="hidden" asp-for="Address.Country" id="placeCountry" />
+            <input type="hidden" asp-for="Address.City" id="placeCity" />
+            <input  type="hidden" asp-for="Address.Latitude" id="placeLatitude" />
+            <input  type="hidden" asp-for="Address.Longitude" id="placeLongitude" />
+            <p hidden id="placeCoordinates"></p>
+    </div>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Create" id="mybtn" class="btn btn-primary" disabled />
+            </div>
+        </form>
+    </div>
+    <div class="col">
+        <h1 id="title" class="w-100 text-center"></h1>
+        <div class="row" id="imageList">
+        </div>
+    </div>
+</div>
+
+<div style="margin-bottom:10vh;">
+    <a asp-action="Index">Back to List</a>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fileInput = document.getElementById('fileInput');
+        const imageList = document.getElementById('imageList');
+        const title = document.getElementById('title');
+        const btn = document.getElementById('mybtn');
+
+        fileInput.addEventListener('change', function (event) {
+            imageList.innerHTML = "";
+            title.innerText = "Select the main image";
+            const files = event.target.files;
+            let count = 0;
+            for (const file of files) {
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    const imageSrc = event.target.result;
+
+                    const imageElement = document.createElement('div');
+                    imageElement.classList.add("col", "col-4");
+                    imageElement.style.maxHeight = "30vh";
+                    imageElement.innerHTML = `
+
+                            <input type="radio" form="MyForm" class="btn-check" name="MainImage" value='${count}' id="option${count}" autocomplete="off" >
+                                    <label class="btn w-100 h-100" for="option${count}"><img class='w-100 h-100' src="${imageSrc}" /></label>
+                        `;
+                    imageList.appendChild(imageElement);
+                    $(`#option${count}`).on('change', function () {
+                        btn.removeAttribute('disabled');
+                    });
+
+                    count++;
+                };
+
+                reader.readAsDataURL(file);
+            }
+            fileInput.hidden = true;
+        });
+    });
+</script>
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

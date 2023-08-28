@@ -1,0 +1,166 @@
+﻿
+@model (int,int)
+@{
+}
+
+    <div id="map-container" style="height: @(Model.Item2)vh; position: relative; width:@Model.Item1%;" >
+        <div id="map" class="h-100 w-100"></div>
+        <div id="search" style="position: absolute; top: 10px; left: 23%; z-index: 1; height: max-content; max-width:100%;" class="w-50 form-control p-0" @* onfocusout="ChangeDisplay(false)"*@>
+            <input disabled class="form-control w-100" id="searchbar" type="text" onkeyup="Change(event)" onfocus="ChangeDisplay(true)" onblur="ChangeDisplay(false)" />
+            <ul id="result" class="list-group w-100 form-control p-0" style="list-style: none; max-height: 200px; overflow-y: auto; z-index: 2;">
+                <!-- Код для элементов списка (li) -->
+            </ul>
+        </div>
+    </div >
+    
+<script type="text/javascript">
+    function ChangeDisplay(isOn) {
+        let res = document.getElementById("result");
+        if (isOn) {
+            res.style.display = "block";
+        }
+        else {
+            setTimeout(() => { res.style.display = "none"; }, 200);
+        }
+
+
+    }
+    function getLocation(map) {
+        if (navigator.geolocation) {
+            // Запрос разрешения на получение местоположения
+            navigator.geolocation.getCurrentPosition((position) => { map.easeTo({ center: [position.coords.longitude, position.coords.latitude] });  });
+        } else {
+            //alert('Ваш браузер не поддерживает Geolocation API.');
+        }
+    }
+
+    //console.log(startCoords);
+    function setMarker(coord) {
+        marker.remove();
+        marker.setLngLat(coord).addTo(map);
+    }
+    async function setPlace(lat, lng) {
+        let responce = await fetch(`https://api.radar.io/v1/geocode/reverse?publishableKey=prj_live_pk_ff66166841fc1450baf234f5399a2e564d01db92&coordinates=${lat},${lng}`, {
+            headers: {
+                'Accept-Language': 'en-US'
+            }
+        });
+        if (responce.ok === true) {
+            let data = await responce.json();
+            //console.log(data);
+            let address = Array.from(data.addresses)[0];
+            $("#placefield").attr("hidden", false);
+            $("#placeTitle").val(address.addressLabel);
+            $("#placeAddress").val(address.formattedAddress);
+            $("#placeWhere").val(`${address.city}, ${address.country}`);
+            $("#placeCountry").val(address.country);
+            $("#placeCity").val(address.city);
+            $("#placeLatitude").val(address.latitude);
+            $("#placeLongitude").val(address.longitude);
+            $("#placeCoordinates").text(`${address.longitude}, ${address.latitude}`);
+
+            //console.log(address);
+            //new maplibregl.Marker({ color: '#007aff' }).setLngLat([address.longitude, address.latitude]).addTo(map);
+            //map.center = [address.longitude, address.latitude];
+        }
+    }
+
+    async function initMap() {
+        let resp = await fetch("https://api.radar.io/v1/geocode/ip?publishableKey=prj_live_pk_ff66166841fc1450baf234f5399a2e564d01db92");
+        if (resp.ok === true) {
+            let data = await resp.json();
+            let adr = data.address;
+            //console.log(adr);
+            startCoords = `${adr.longitude},${adr.latitude}`;
+            map = new maplibregl.Map({
+                container: 'map',
+                style: 'https://api.radar.io/maps/styles/radar-default-v1?publishableKey=prj_live_pk_ff66166841fc1450baf234f5399a2e564d01db92',
+                center: startCoords.split(','), // NYC
+                zoom: 11
+            });
+            map.on("click", async (event) => {
+                //console.log(event);
+                let coord = event.lngLat;
+                setMarker(coord);
+                setPlace(coord.lat, coord.lng);
+            });
+
+            map.addControl(new maplibregl.NavigationControl());
+            getLocation(map);
+            //search.attributes("disabled",false);
+            document.getElementById("searchbar").disabled = false;
+        }
+    }
+
+    let startCoords;
+    //console.log(startCoords);
+    //console.log(startCoords.split(','));
+
+    let map;
+    let search = document.getElementById("search");
+    initMap();
+    let marker = new maplibregl.Marker();
+    //new maplibregl.Marker({ color: '#007aff' }).setLngLat([-73.9911, 40.7342]).addTo(map); // Radar HQ
+
+    async function Change(e) {
+        let res = document.getElementById("result");
+        //console.log(e.target.value);
+        let responce = await fetch(`https://api.radar.io/v1/search/autocomplete?query=${e.target.value}&publishableKey=prj_live_pk_ff66166841fc1450baf234f5399a2e564d01db92`);
+        if (responce.ok === true) {
+            res.innerText = "";
+            let data = await responce.json();
+            console.log(data);
+            let count = 0;
+            Array.from(data.addresses).forEach(elem => {
+                let li = document.createElement("li");
+                let p = document.createElement("p");
+                let i = document.createElement("i");
+                let h = document.createElement("h3");
+                let small = document.createElement("small");
+                let div = document.createElement("div");
+                let hiddenp = document.createElement("p");
+                li.style.display = "flex";
+                li.classList.add("list-group-item", "w-100", "autocompleteitem");
+                li.onclick = async function (event) {
+                    let searchbar = $("#searchbar");
+                    let target = event.target;
+                    let li = target.offsetParent.nodeName === "LI" ? target.offsetParent : target;
+                    let count = li.id.slice(-1);
+                    let query = $(`#valueField${count}`).text();
+                    let coord = $(`#coordinates${count}`).text();
+                    console.log(query);
+                    //searchbar.val($(`#valueField${count}`).text());
+                    //new maplibregl.Marker({ color: '#007aff' }).setLngLat(coord.split(",")).addTo(map);
+                    setMarker(coord.split(","));
+                    setPlace(coord.split(",")[1], coord.split(",")[0]);
+                    //marker.remove();
+                    //marker.setLngLat().addTo(map);
+                    map.easeTo({ center: coord.split(",") });
+
+                    map.center = coord.split(",");
+                    ChangeDisplay(false);
+                };
+                i.classList.add("bi", "bi-geo-alt");
+                h.classList.add("pt-2", "me-1");
+                p.innerText = elem.addressLabel;
+                hiddenp.hidden = true;
+                hiddenp.id = `coordinates${count}`;
+                small.id = `valueField${count}`;
+                li.id = `liValue${count}`;
+                count++;
+                p.classList.add("mb-0");
+                hiddenp.innerText = `${elem.longitude},${elem.latitude}`;
+                small.innerText = elem.formattedAddress;
+
+                //li.style.position="absolute";
+                h.appendChild(i);
+                div.appendChild(p);
+                div.appendChild(small);
+                div.appendChild(hiddenp);
+                li.appendChild(h);
+                li.appendChild(div);
+                res.appendChild(li);
+            })
+        }
+    }
+</script>
