@@ -6,6 +6,10 @@
     "storage1": {
       "type": "storage",
       "connectionId": "HouseContainer"
+    },
+    "appInsights1": {
+      "type": "appInsights",
+      "connectionId": "APPLICATIONINSIGHTS_CONNECTION_STRING"
     }
   }
 }

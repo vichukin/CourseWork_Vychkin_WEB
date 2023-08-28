@@ -5,12 +5,14 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>71821a34-4cbb-4960-9b21-40133807cffd</UserSecretsId>
+    <ApplicationInsightsResourceId>/subscriptions/7e101f9e-d905-4140-b273-1e852fc83cc1/resourceGroups/CourseWork_WEB/providers/microsoft.insights/components/CourseWorkVychkinWEB20230829012250</ApplicationInsightsResourceId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.3.0" />
     <PackageReference Include="Azure.Storage.Files.Shares" Version="12.1.0" />
     <PackageReference Include="Azure.Storage.Queues" Version="12.2.0" />
+    <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.20" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.20">
