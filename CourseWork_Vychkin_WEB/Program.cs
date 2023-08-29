@@ -9,7 +9,7 @@ using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
+var keyVaultEndpoint = new Uri("https://courseworkvychkinwebvaul.vault.azure.net/");
 builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
 var configuration = builder.Configuration;
 
