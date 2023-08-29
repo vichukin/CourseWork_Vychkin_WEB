@@ -5,8 +5,12 @@ using Microsoft.Extensions.Azure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using CourseWork_Vychkin_WEB.Models.RouteConstraints;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
+builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
 var configuration = builder.Configuration;
 
 // Add services to the container.
@@ -15,18 +19,21 @@ builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<Hous
 
 builder.Services.AddDbContext<HousesDBContext>(options =>
 {
-    options.UseSqlServer(builder.Configuration.GetConnectionString("HousesDb"));
+    //options.UseSqlServer(builder.Configuration.GetConnectionString("HousesDb"));
+    options.UseSqlServer(builder.Configuration["HousesDB"]);
 });
 builder.Services.AddAzureClients(clientBuilder =>
 {
-    clientBuilder.AddBlobServiceClient(builder.Configuration["HouseContainer:blob"], preferMsi: true);
-    clientBuilder.AddQueueServiceClient(builder.Configuration["HouseContainer:queue"], preferMsi: true);
+    clientBuilder.AddBlobServiceClient(builder.Configuration["HouseContainerBlob"], preferMsi: true);
+    clientBuilder.AddQueueServiceClient(builder.Configuration["HouseContainerQueue"], preferMsi: true);
 });
 builder.Services.AddAuthentication().AddGoogle(options=>
 {
-    IConfigurationSection googlesection = configuration.GetSection("Authentication:Google");
-    options.ClientId = googlesection.GetValue<string>("ClientId");
-    options.ClientSecret = googlesection["ClientSecret"];
+    //IConfigurationSection googlesection = configuration.GetSection("Authentication:Google");
+    //options.ClientId = googlesection.GetValue<string>("ClientId");
+    //options.ClientSecret = googlesection["ClientSecret"];
+    options.ClientId = configuration.GetValue<string>("GoogleClientId");
+    options.ClientSecret = configuration["GoogleClientSecret"];
     options.ClaimActions.MapJsonKey("picture", "picture", "url");
     options.Scope.Add("https://www.googleapis.com/auth/userinfo.profile");
 });
@@ -36,7 +43,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Account/Signin"; // Путь к странице входа
 });
 builder.Services.AddSession();
-builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
+builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTSCONNECTIONSTRING"]);
+//builder.Services.AddApplicationInsightsTelemetry(builder.Configuration["APPLICATIONINSIGHTS_CONNECTION_STRING"]);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
