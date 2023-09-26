@@ -84,7 +84,7 @@ namespace CourseWork_Vychkin_WEB.Controllers.Admin
                 
                 
             }
-            return RedirectToAction("Details", house);
+            return RedirectToAction("Details", new {Id=house.Id});
         }
 
         // GET: Houses
