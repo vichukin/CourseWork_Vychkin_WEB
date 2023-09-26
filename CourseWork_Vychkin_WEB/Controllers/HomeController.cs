@@ -65,7 +65,7 @@ namespace CourseWork_Vychkin_WEB.Controllers
                 houses = houses.Where(t => t.Price >= Min).ToList();
             if (Max != null)
                 houses = houses.Where(t => t.Price <= Max).ToList();
-            int itemsPerPage = 24;
+            int itemsPerPage = 16;
             int pagecount = (int)(Math.Ceiling((decimal)houses.Count() / itemsPerPage));
             houses = houses.Skip((Page - 1) * itemsPerPage).Take(itemsPerPage).ToList();
 
