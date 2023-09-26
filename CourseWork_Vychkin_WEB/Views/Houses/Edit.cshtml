@@ -10,6 +10,31 @@
 </form>
 <div class="row">
 
+    <div class="modal fade" id="DeleteButtonsModal" tabindex="-1" aria-labelledby="DeleteButtonsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirm delete</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Are you sure to delete this house?</h6>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form asp-action="Delete" asp-controller="Houses">
+                        <input type="hidden" name="Id" value="@Model.House.Id" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+
     <div class="modal fade" id="TagsModal" tabindex="-1" aria-labelledby="TagsModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -44,6 +69,7 @@
                 </div>
             </div>
         </div>
+    </div>
     </div>
     <div class="row">
 
@@ -393,6 +419,7 @@
                 <div class="btn-group btn-group-lg w-50">
                     <button class="btn btn-outline-success" form="MyForm">Save changes</button>
                     <a class="btn btn-outline-primary" asp-action="Details" asp-route-Id="@Model.House.Id" >Back</a>
+                        <button class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#DeleteButtonsModal">delete</button>
                 </div>
             </div>
         </div>

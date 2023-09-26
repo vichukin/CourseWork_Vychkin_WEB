@@ -14,7 +14,32 @@
         
     }
 }
+<div class="row">
 
+    <div class="modal fade" id="DeleteButtonsModal" tabindex="-1" aria-labelledby="DeleteButtonsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Confirm delete</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Are you sure to delete this house?</h6>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <form asp-action="Delete" asp-controller="Houses">
+                        <input type="hidden" name="Id" id="DeleteItemId" />
+                        <input type="checkbox" hidden name="adm" checked id="DeleteItemId" />
+                        <button type="submit" class="btn btn-danger">Delete</button>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 <h1>Index</h1>
 
 <p>
@@ -117,8 +142,8 @@
             <td>
                 <div class="btn-group">
                 <a class="btn btn-outline-warning" asp-action="Edit" asp-route-id="@item.Id">Edit</a> 
-                <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a> 
-                <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <a class="btn btn-outline-primary" asp-action="Details" asp-route-id="@item.Id">Details</a>
+                        <button class="btn btn-outline-danger" onclick="GetItemForDelete(event)" name="@item.Id" data-bs-toggle="modal" data-bs-target="#DeleteButtonsModal" >Delete</button>
                 @if(item.IsModerated!=true)
                 {
                  <a asp-action="Approve" class="btn btn-outline-success" asp-route-id="@item.Id">Approve</a>
@@ -129,3 +154,9 @@
 }
     </tbody>
 </table>
+<script>
+    function GetItemForDelete(event) {
+        let item = document.getElementById("DeleteItemId");
+        item.value = event.target.name;
+    }
+</script>

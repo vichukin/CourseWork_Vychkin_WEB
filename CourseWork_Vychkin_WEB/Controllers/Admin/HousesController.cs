@@ -301,7 +301,7 @@ namespace CourseWork_Vychkin_WEB.Controllers.Admin
 
         // GET: Houses/Delete/5
         [Authorize(Roles ="User")]
-        public async Task<IActionResult> Delete(int? id)
+        public async Task<IActionResult> Delete(int? id, bool? adm)
         {
             if (id == null || _context.Houses == null)
             {
@@ -324,39 +324,22 @@ namespace CourseWork_Vychkin_WEB.Controllers.Admin
             {
                 return NotFound();
             }
-
-            return View(house);
-        }
-
-        // POST: Houses/Delete/5
-        [Authorize(Roles = "User")]
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-
-            if (_context.Houses == null)
+            foreach(var img in house.Images)
             {
-                return Problem("Entity set 'HousesDBContext.Houses'  is null.");
+                var client = container.GetBlobClient(img.Path);
+                await client.DeleteIfExistsAsync();
+
             }
-            var house = await _context.Houses.Include(h => h.Address)
-                .Include(h => h.Images)
-                .Include(h => h.User)
-                .Include(h => h.Rents)
-                .Include(_ => _.Tags).FirstOrDefaultAsync(t => t.Id == id);
-            var user = await UserManager.GetUserAsync(User);
-            var roles = await UserManager.GetRolesAsync(user);
-            if (!roles.Contains("Admin") && user.Id != house.User.Id)
-            {
-                return NotFound();
-            }
-            if (house != null)
-            {   
-                _context.Houses.Remove(house);
-            }
-            
+            _context.Images.RemoveRange(house.Images);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            //_context.Addresses.Remove(house.Address);
+            //await _context.SaveChangesAsync();
+            _context.Houses.Remove(house);
+            await _context.SaveChangesAsync();
+            if(adm!=null&&adm==true)
+               return RedirectToAction("Index", "Houses");
+            else
+                return RedirectToAction("Index","Home");
         }
         [HttpPost]
         [ValidateAntiForgeryToken]
